@@ -42,12 +42,15 @@ export interface HomepageParse {
   trustBadges: string[];
   navItems: string[];
   announcement: string | null;
+  /** Length of visible body text — used to detect unrendered JS shells. */
+  contentLength: number;
 }
 
 export function parseHomepage(html: string): HomepageParse {
   const $ = cheerio.load(html);
 
   const title = clean($("title").first().text());
+  const contentLength = clean($("body").text()).length;
 
   // Hero: first H1 (or a prominent H2 inside a banner/hero section).
   let heroHeadline =
@@ -114,6 +117,7 @@ export function parseHomepage(html: string): HomepageParse {
     trustBadges,
     navItems,
     announcement,
+    contentLength,
   };
 }
 
@@ -123,6 +127,8 @@ export interface ProductPageParse {
   hasReturnsInfo: boolean;
   hasFaq: boolean;
   ctaText: string | null;
+  /** Length of visible body text — used to detect unrendered JS shells. */
+  contentLength: number;
 }
 
 /** Review-app fingerprints commonly embedded in Shopify product pages. */
@@ -167,5 +173,6 @@ export function parseProductPage(html: string): ProductPageParse {
     hasReturnsInfo,
     hasFaq,
     ctaText: ctaText || null,
+    contentLength: bodyText.length,
   };
 }

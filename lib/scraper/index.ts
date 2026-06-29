@@ -19,6 +19,16 @@ import type { StoreEvidence } from "@/types/audit";
 const MAX_PRODUCTS = Number(process.env.MAX_PRODUCTS) || 30;
 const MAX_COLLECTIONS = 30;
 
+/**
+ * Minimum visible body-text length for a page to count as "usefully fetched".
+ * A fully JS-rendered storefront returns a near-empty HTML shell (the real
+ * content is hydrated client-side). Treating that shell as a successful fetch
+ * would let us fabricate problems ("no hero!", "no reviews!") that are really
+ * just things we couldn't see. Below this threshold we mark the page as not
+ * fetched, so the audit says "not assessed" instead of inventing a gap.
+ */
+const RENDER_THRESHOLD = 300;
+
 function deriveStoreName(homepageTitle: string, hostname: string): string {
   // Homepage <title> is usually "Brand – tagline" or "Brand | tagline".
   const first = homepageTitle.split(/[|–—\-:]/)[0]?.trim();
@@ -50,10 +60,23 @@ export async function scrapeStore(
     fetchCollections(baseUrl, MAX_COLLECTIONS),
   ]);
 
-  const homepage = homepageRes.ok
-    ? parseHomepage(homepageRes.body)
+  const parsedHome = homepageRes.ok ? parseHomepage(homepageRes.body) : null;
+  // A fetched-but-thin page (JS shell) is treated as not usefully fetched.
+  const homepageUsable =
+    parsedHome !== null && parsedHome.contentLength >= RENDER_THRESHOLD;
+
+  const homepage: StoreEvidence["homepage"] = homepageUsable
+    ? {
+        title: parsedHome!.title,
+        heroHeadline: parsedHome!.heroHeadline,
+        heroSubtitle: parsedHome!.heroSubtitle,
+        primaryCtas: parsedHome!.primaryCtas,
+        trustBadges: parsedHome!.trustBadges,
+        navItems: parsedHome!.navItems,
+        announcement: parsedHome!.announcement,
+      }
     : {
-        title: "",
+        title: parsedHome?.title ?? "",
         heroHeadline: null,
         heroSubtitle: null,
         primaryCtas: [],
@@ -79,11 +102,20 @@ export async function scrapeStore(
   const sampleUrl = products[0]?.url ?? null;
   if (sampleUrl) {
     const pdpRes = await fetchUrl(sampleUrl);
-    if (pdpRes.ok) {
-      const parsed = parseProductPage(pdpRes.body);
-      productPageSignals = { ...parsed, sampledProductUrl: sampleUrl };
+    const parsed = pdpRes.ok ? parseProductPage(pdpRes.body) : null;
+    if (parsed && parsed.contentLength >= RENDER_THRESHOLD) {
+      productPageSignals = {
+        hasReviews: parsed.hasReviews,
+        hasShippingInfo: parsed.hasShippingInfo,
+        hasReturnsInfo: parsed.hasReturnsInfo,
+        hasFaq: parsed.hasFaq,
+        ctaText: parsed.ctaText,
+        sampledProductUrl: sampleUrl,
+      };
       productPageOk = true;
     } else {
+      // Reached the page but it was a thin/unrendered shell — record the URL
+      // but leave signals null so nothing is inferred from what we couldn't see.
       productPageSignals.sampledProductUrl = sampleUrl;
     }
   }
@@ -100,7 +132,7 @@ export async function scrapeStore(
     sourceFlags: {
       productsJson: productsRes.ok,
       collectionsJson: collectionsRes.ok,
-      homepageHtml: homepageRes.ok,
+      homepageHtml: homepageUsable,
       productPageHtml: productPageOk,
     },
   };
