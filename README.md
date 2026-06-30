@@ -105,12 +105,15 @@ Shopify stores expose `/products.json` and `/collections.json` as **public, stru
 
 ### 3. The LLM sits behind a provider interface, with a deterministic fallback
 
-`LLMProvider` is an interface with two implementations:
-- `ClaudeProvider` — real analysis via the Anthropic API, using structured-output (JSON-schema) mode.
-- `TemplateProvider` — a rule-based generator that produces a valid (if shallower) audit **with no API key**.
+`LLMProvider` is an interface with three implementations, tried in order:
+- `ClaudeProvider` — analysis via the Anthropic API, using structured-output (JSON-schema) mode.
+- `GeminiProvider` — analysis via Google Gemini (free tier), forcing JSON output. A free way to run the real model-driven path.
+- `TemplateProvider` — a rule-based generator that produces a valid (if shallower) audit **with no API key at all**.
 
-- **Why:** It makes the LLM a swappable dependency (trivially mockable in tests), and it means **the app runs and demos even with no API key configured** — it degrades, it doesn't die. That is the "never depend on the model blindly; fail gracefully" principle made concrete.
-- **Tradeoff:** The fallback's output is rule-based and less nuanced. It's a safety net and a test seam, not a replacement for the model.
+At runtime, `analyzeStore` uses the first configured provider (Claude if `ANTHROPIC_API_KEY` is set, else Gemini if `GEMINI_API_KEY` is set), and falls back to the next — and ultimately to the template — on any failure.
+
+- **Why:** It makes the LLM a swappable dependency (trivially mockable in tests), lets the model path run for free via Gemini, and means **the app runs and demos even with no key configured** — it degrades, it doesn't die. That is the "never depend on the model blindly; fail gracefully" principle made concrete.
+- **Tradeoff:** The template fallback's output is rule-based and less nuanced. It's a safety net and a test seam, not a replacement for the model.
 
 ### 4. We never trust the model's output blindly
 
@@ -160,7 +163,7 @@ High-impact, high-confidence, low-effort opportunities rise to the top — the s
 | Language | TypeScript (strict) |
 | Styling | Tailwind CSS v4 + shadcn/ui |
 | Scraping | Shopify public JSON + `cheerio` (HTML parse) |
-| LLM | Anthropic Claude (via provider interface) + deterministic fallback |
+| LLM | Anthropic Claude / Google Gemini (via provider interface) + deterministic fallback |
 | Validation | `zod` |
 | Charts | `recharts` |
 | Tests | `vitest` |
@@ -180,7 +183,7 @@ cro-engine/
 │  ├─ validation/url.ts             # normalize + SSRF guard
 │  ├─ scraper/                      # shopify.ts, fetcher.ts, parseHtml.ts, index.ts
 │  ├─ analysis/                     # normalize.ts, scoring.ts
-│  ├─ llm/                          # provider.ts, claude.ts, template.ts, validate.ts
+│  ├─ llm/                          # provider.ts, claude.ts, gemini.ts, template.ts, validate.ts
 │  ├─ prompts/                      # system.ts, user.ts, schema.ts
 │  ├─ cache/                        # store.ts, memory.ts
 │  └─ orchestrator.ts               # scraper → llm → scoring → cache
@@ -201,7 +204,7 @@ npm run dev                    # http://localhost:3000
 
 Open the app, paste a Shopify store URL (e.g. `https://gymshark.com`), and run an audit.
 
-> **No API key?** The app still runs — it falls back to the deterministic `TemplateProvider` and clearly labels the result as a fallback audit. Add a key to see full LLM-quality output.
+> **No API key?** The app still runs — it falls back to the deterministic `TemplateProvider` and clearly labels the result as a fallback audit. Set `ANTHROPIC_API_KEY` or a free `GEMINI_API_KEY` (see below) for full LLM-quality output.
 
 ---
 
@@ -209,11 +212,13 @@ Open the app, paste a Shopify store URL (e.g. `https://gymshark.com`), and run a
 
 | Variable | Required | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | No* | Anthropic API key. Without it, the app uses the deterministic fallback. Get one at [platform.claude.com](https://platform.claude.com). |
-| `LLM_MODEL` | No | Model id (default: a current Claude model). |
+| `ANTHROPIC_API_KEY` | No* | Anthropic API key (preferred provider). Get one at [platform.claude.com](https://platform.claude.com). |
+| `LLM_MODEL` | No | Claude model id (default `claude-opus-4-8`; e.g. `claude-haiku-4-5` to cut cost). |
+| `GEMINI_API_KEY` | No* | Google Gemini key — a **free** way to run the real model path. Get one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey). |
+| `GEMINI_MODEL` | No | Gemini model id (default `gemini-2.5-flash`). |
 | `MAX_PRODUCTS` | No | Cap on products sampled per audit (controls token cost/latency). |
 
-\* Not required to run; required for real LLM-quality audits.
+\* Neither key is required to run — with no key set, the app uses the deterministic fallback. Set **either** key for real LLM-quality audits.
 
 ---
 
