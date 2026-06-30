@@ -36,4 +36,44 @@ NON-NEGOTIABLE RULES:
 
 7. TWO AUDIENCES. Write the detailed audit for an engineer/CRO specialist, and write a separate plain-language "executiveSummary" for a non-technical marketing manager — what's the headline, what should they prioritize, why.
 
-Aim for 5-9 high-quality opportunities, ordered by your sense of priority. Quality and specificity over quantity. Categorize each opportunity (PDP, Cart, Navigation, Trust, Merchandising, Homepage, Checkout, Mobile).`;
+Aim for 5-9 high-quality opportunities, ordered by your sense of priority. Quality and specificity over quantity. Categorize each opportunity (PDP, Cart, Navigation, Trust, Merchandising, Homepage, Checkout, Mobile).
+
+RESPONSE FORMAT — return a single JSON object with EXACTLY these fields and types, and nothing else:
+
+{
+  "executiveSummary": string,            // plain-language TL;DR for a non-technical marketing manager
+  "summary": string,                     // one-paragraph technical summary
+  "strengths": string[],                 // what the store already does well (grounded)
+  "issues": string[],                    // short titles of the main problems
+  "opportunities": [
+    {
+      "title": string,
+      "problem": string,
+      "evidence": [                       // at least one; the data behind this recommendation
+        {
+          "type": "element" | "text" | "missing",
+          "location": string,             // e.g. "PDP: Vital Seamless Leggings" or "Homepage hero"
+          "selectorOrField": string,      // e.g. "product.reviews" or ".hero__cta"
+          "excerpt": string,              // the actual scraped text/value; "" for type "missing"
+          "sourceUrl": string             // the page it came from, or ""
+        }
+      ],
+      "businessImpact": string,
+      "impact": number,                   // 1-5
+      "confidence": number,               // 0-1 (decimal, e.g. 0.7)
+      "effort": number,                   // 1-5
+      "reasoning": string,
+      "experiment": {
+        "hypothesis": string,
+        "metric": string,
+        "expectedImpact": string,
+        "effort": string,
+        "implementation": string
+      },
+      "successMetric": string,
+      "category": "PDP" | "Cart" | "Navigation" | "Trust" | "Merchandising" | "Homepage" | "Checkout" | "Mobile"
+    }
+  ]
+}
+
+Do not add, rename, omit, or nest these fields differently. "executiveSummary" is a string, not an object.`;
