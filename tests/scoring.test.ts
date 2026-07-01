@@ -163,4 +163,44 @@ describe("rankOpportunities", () => {
     expect(ranked.find((o) => o.title === "High priority")!.grounded).toBe(true);
     expect(ranked[0].id).toMatch(/^opp-\d+-/);
   });
+
+  it("grounds citations of structured fields (availability, counts), not just prose", () => {
+    const evidence = makeEvidence({
+      products: [
+        {
+          title: "Sold Out Sneaker",
+          handle: "sold-out-sneaker",
+          price: "120.00",
+          available: false,
+          imagesCount: 5,
+          descriptionExcerpt: "A very popular sneaker.",
+          url: "https://example.com/products/sold-out-sneaker",
+        },
+      ],
+      collections: [{ title: "Clearance", handle: "clearance", productsCount: 0 }],
+    });
+
+    const structuredOpp = makeOpp({
+      title: "Fix out-of-stock experience",
+      evidence: [
+        {
+          type: "text",
+          location: "Product List",
+          selectorOrField: "product.available",
+          excerpt: "false", // structured field value, not prose
+          sourceUrl: "https://example.com",
+        },
+        {
+          type: "text",
+          location: "Collections List",
+          selectorOrField: "collection.productsCount",
+          excerpt: "0",
+          sourceUrl: "https://example.com",
+        },
+      ],
+    });
+
+    const [ranked] = rankOpportunities([structuredOpp], evidence);
+    expect(ranked.grounded).toBe(true);
+  });
 });

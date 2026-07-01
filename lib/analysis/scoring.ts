@@ -36,6 +36,7 @@ export function priorityScore(
  * formatting differences don't cause false negatives.
  */
 function buildEvidenceCorpus(evidence: StoreEvidence): string {
+  const sp = evidence.productPageSignals;
   const parts: string[] = [
     evidence.storeName,
     evidence.homepage.title,
@@ -45,9 +46,26 @@ function buildEvidenceCorpus(evidence: StoreEvidence): string {
     ...evidence.homepage.primaryCtas,
     ...evidence.homepage.trustBadges,
     ...evidence.homepage.navItems,
-    ...evidence.products.flatMap((p) => [p.title, p.descriptionExcerpt, p.price ?? ""]),
-    ...evidence.collections.map((c) => c.title),
-    evidence.productPageSignals.ctaText ?? "",
+    // Products: text content AND structured fields (availability, image counts,
+    // price). Including the structured values means a legitimate citation of a
+    // scraped field — e.g. `product.available` = "false" — is recognized as
+    // grounded, not just prose. Invented copy still won't match, so the
+    // hallucination guard holds.
+    ...evidence.products.flatMap((p) => [
+      p.title,
+      p.descriptionExcerpt,
+      p.price ?? "",
+      String(p.available),
+      String(p.imagesCount),
+    ]),
+    // Collections: title AND product count (so "productsCount = 0" grounds).
+    ...evidence.collections.flatMap((c) => [c.title, String(c.productsCount)]),
+    // Product-page signals as structured facts.
+    String(sp.ctaText), // "null" when absent
+    String(sp.hasReviews),
+    String(sp.hasShippingInfo),
+    String(sp.hasReturnsInfo),
+    String(sp.hasFaq),
   ];
   return normalize(parts.join(" · "));
 }
