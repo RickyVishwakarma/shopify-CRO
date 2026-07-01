@@ -25,7 +25,7 @@ export function OpportunityCard({
   const [open, setOpen] = useState(false);
 
   return (
-    <Card className="overflow-hidden transition-colors hover:bg-card-hover">
+    <Card className="overflow-hidden transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)]">
       <div className="p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const EXAMPLES = ["drsquatch.com", "allbirds.com", "deathwishcoffee.com"];
 const STAGES = [
@@ -76,24 +75,27 @@ export default function Home() {
           audit — grounded in the store&apos;s real catalog and pages.
         </p>
 
-        <form onSubmit={onSubmit} className="mx-auto mt-8 flex max-w-md gap-2">
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="gymshark.com"
-            disabled={loading}
-            autoFocus
-            aria-label="Shopify store URL"
-          />
-          <Button type="submit" disabled={loading || !url.trim()}>
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <>
-                Audit <ArrowRight className="size-4" />
-              </>
-            )}
-          </Button>
+        <form onSubmit={onSubmit} className="mx-auto mt-8 max-w-md">
+          <div className="flex items-center gap-1.5 rounded-xl border border-border bg-card p-1.5 shadow-[var(--shadow-card)] transition-shadow focus-within:shadow-[var(--shadow-card-hover)] focus-within:ring-2 focus-within:ring-ring">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="gymshark.com"
+              disabled={loading}
+              autoFocus
+              aria-label="Shopify store URL"
+              className="h-10 flex-1 bg-transparent px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            />
+            <Button type="submit" disabled={loading || !url.trim()}>
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <>
+                  Audit <ArrowRight className="size-4" />
+                </>
+              )}
+            </Button>
+          </div>
         </form>
 
         {!loading && (

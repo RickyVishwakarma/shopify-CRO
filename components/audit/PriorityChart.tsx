@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
   Cell,
+  LabelList,
   Tooltip,
 } from "recharts";
 import type { Opportunity } from "@/types/audit";
@@ -30,7 +31,7 @@ export function PriorityChart({ opportunities }: { opportunities: Opportunity[] 
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 4, right: 16, bottom: 4, left: 4 }}
+          margin={{ top: 4, right: 34, bottom: 4, left: 4 }}
         >
           <XAxis
             type="number"
@@ -61,6 +62,13 @@ export function PriorityChart({ opportunities }: { opportunities: Opportunity[] 
             {data.map((d, i) => (
               <Cell key={i} fill={color(d.priority)} />
             ))}
+            <LabelList
+              dataKey="priority"
+              position="right"
+              offset={8}
+              fontSize={11}
+              fill="var(--muted-foreground)"
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

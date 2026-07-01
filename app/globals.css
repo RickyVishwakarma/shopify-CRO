@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 /*
- * Minimal, light palette. Tokens are mapped into Tailwind via @theme inline so
+ * Minimal, light palette. Tokens map into Tailwind via @theme inline so
  * utilities like `bg-card`, `text-muted-foreground`, and `border-border` work
- * throughout the app. Quiet neutrals, a single blue accent, generous whitespace.
+ * throughout the app. A soft gray page lets white cards float with a subtle
+ * shadow — quiet, professional, generous whitespace.
  */
 :root {
-  --background: #ffffff;
+  --background: #f7f7f8;
   --foreground: #18181b;
   --card: #ffffff;
-  --card-hover: #fafafa;
+  --card-hover: #ffffff;
   --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
+  --muted-foreground: #6b7280;
+  --border: #ececef;
   --primary: #18181b;
   --primary-foreground: #ffffff;
   --accent: #2563eb;
-  --ring: #d4d4d8;
-  --radius: 0.7rem;
+  --ring: #cbd5e1;
+  --radius: 0.8rem;
 
   --good: #16a34a;
   --warn: #b45309;
   --bad: #dc2626;
+
+  --shadow-card: 0 1px 2px rgba(24, 24, 27, 0.04), 0 1px 3px rgba(24, 24, 27, 0.06);
+  --shadow-card-hover: 0 4px 12px rgba(24, 24, 27, 0.08), 0 2px 4px rgba(24, 24, 27, 0.05);
 }
 
 @theme inline {
@@ -42,6 +46,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --radius-lg: var(--radius);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
 }
 
 * {
@@ -53,4 +59,19 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle grid texture on the page background for a touch of depth. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, rgba(24, 24, 27, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(24, 24, 27, 0.02) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(60rem 40rem at 50% 0%, black, transparent 75%);
+  pointer-events: none;
 }
