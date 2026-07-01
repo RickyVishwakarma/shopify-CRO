@@ -103,7 +103,7 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
         <Card className="lg:col-span-2">
           <CardContent>
             <h2 className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <CheckCircle2 className="size-3.5 text-[color:var(--good)]" /> What's
+              <CheckCircle2 className="size-3.5 text-[color:var(--good)]" /> What&apos;s
               working
             </h2>
             <ul className="space-y-2">

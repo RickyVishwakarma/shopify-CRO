@@ -5,7 +5,7 @@
 This is an internal-consultant-style tool: the kind of thing a CRO agency would run before a sales call to walk in already knowing where a store is leaving money on the table.
 
 ```
-  https://gymshark.com  ─►  [ scrape ]  ─►  [ extract evidence ]  ─►  [ Claude ]  ─►  ranked audit
+  https://gymshark.com  ─►  [ scrape ]  ─►  [ extract evidence ]  ─►  [ LLM ]  ─►  ranked audit
 ```
 
 **Example output (abridged):**
@@ -74,6 +74,7 @@ Three things separate this from a tool that just tells every store "add reviews 
    │                                              token-bounded)         │
    ├─► LLM provider  (dependency-injected interface)                    │
    │     ├─ ClaudeProvider   strict JSON · zod validate · repair retry  │
+   │     ├─ GeminiProvider   free tier · forced JSON · retry + backoff  │
    │     └─ TemplateProvider deterministic fallback — runs with no key  │
    │                                                                    │
    ├─► Grounding check ───────────────────────► flag any cited evidence │

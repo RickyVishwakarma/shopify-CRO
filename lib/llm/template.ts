@@ -19,7 +19,6 @@ import type { LLMProvider } from "./provider";
 export class TemplateProvider implements LLMProvider {
   readonly model = "template-fallback";
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async analyze(evidence: StoreEvidence): Promise<LlmAudit> {
     return buildTemplateAudit(evidence);
   }
