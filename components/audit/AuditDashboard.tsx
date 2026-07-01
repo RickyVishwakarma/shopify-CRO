@@ -71,9 +71,12 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
         <div className="mt-5 flex items-start gap-2 rounded-lg border border-[color:var(--warn)]/30 bg-[color:var(--warn)]/10 px-4 py-3 text-sm text-[color:var(--warn)]">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>
-            This audit was produced by the deterministic fallback engine (no API
-            key configured). Add an <code className="font-mono">ANTHROPIC_API_KEY</code> for
-            a deeper, model-driven analysis.
+            This audit was produced by the deterministic fallback engine (no LLM
+            key configured, or the provider was unavailable). Set a free{" "}
+            <code className="font-mono">GEMINI_API_KEY</code> — or an{" "}
+            <code className="font-mono">ANTHROPIC_API_KEY</code> — in{" "}
+            <code className="font-mono">.env.local</code> and restart for a deeper,
+            model-driven analysis.
           </span>
         </div>
       )}
