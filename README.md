@@ -10,6 +10,12 @@ This is an internal-consultant-style tool: the kind of thing a CRO agency would 
   https://gymshark.com  ─►  [ scrape ]  ─►  [ extract evidence ]  ─►  [ LLM ]  ─►  ranked audit
 ```
 
+## Screenshots
+
+|                             |                              |
+| --------------------------- | ---------------------------- |
+| ![Landing page](docs/home.png) | ![Audit report](docs/audit.png) |
+
 **Example output (abridged):**
 
 > **Opportunity #1 — Surface social proof on product pages** · Priority 4.0
@@ -22,6 +28,7 @@ This is an internal-consultant-style tool: the kind of thing a CRO agency would 
 
 ## Table of contents
 
+- [Screenshots](#screenshots)
 - [What it does](#what-it-does)
 - [Architecture](#architecture)
 - [Key engineering decisions (and the tradeoffs)](#key-engineering-decisions-and-the-tradeoffs)

@@ -14,10 +14,11 @@
   --muted: #f4f4f5;
   --muted-foreground: #6b7280;
   --border: #ececef;
-  --primary: #18181b;
+  --primary: #4f46e5;
   --primary-foreground: #ffffff;
-  --accent: #2563eb;
-  --ring: #cbd5e1;
+  --accent: #4f46e5;
+  --accent-soft: #eef2ff;
+  --ring: #c7d2fe;
   --radius: 0.8rem;
 
   --good: #16a34a;
@@ -39,6 +40,7 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-ring: var(--ring);
   --color-good: var(--good);
   --color-warn: var(--warn);

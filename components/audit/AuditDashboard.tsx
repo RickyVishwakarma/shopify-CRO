@@ -82,7 +82,7 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
       )}
 
       {/* Executive summary */}
-      <Card className="mt-6">
+      <Card className="mt-8">
         <CardContent>
           <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Executive summary
@@ -94,7 +94,7 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
       </Card>
 
       {/* Chart + strengths */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-5">
+      <div className="mt-6 grid gap-5 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardContent>
             <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -141,7 +141,7 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
       </div>
 
       {/* Category filter chips */}
-      <div className="mb-5 flex flex-wrap gap-1.5">
+      <div className="mb-6 flex flex-wrap gap-1.5">
         {categories.map((c) => (
           <button key={c} onClick={() => setCategory(c)}>
             <Badge variant={category === c ? "accent" : "muted"}>{c}</Badge>
@@ -150,7 +150,7 @@ export function AuditDashboard({ audit }: { audit: Audit }) {
       </div>
 
       {/* Opportunity list */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         {filtered.length === 0 ? (
           <p className="rounded-lg border border-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
             No opportunities match your filters.

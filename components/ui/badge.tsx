@@ -10,7 +10,7 @@ const variants: Record<Variant, string> = {
   warn: "bg-[color:var(--warn)]/12 text-[color:var(--warn)] border border-[color:var(--warn)]/25",
   bad: "bg-[color:var(--bad)]/12 text-[color:var(--bad)] border border-[color:var(--bad)]/25",
   accent:
-    "bg-[color:var(--accent)]/12 text-[color:var(--accent)] border border-[color:var(--accent)]/25",
+    "bg-accent-soft text-[color:var(--accent)] border border-[color:var(--accent)]/20",
 };
 
 export function Badge({
