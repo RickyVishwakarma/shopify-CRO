@@ -17,6 +17,12 @@ import type { LLMProvider } from "./provider";
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
+/** Transient statuses worth retrying — overload (503), rate limit (429), 5xx. */
+const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+const MAX_RETRIES = 3;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];
   promptFeedback?: { blockReason?: string };
@@ -49,26 +55,43 @@ export class GeminiProvider implements LLMProvider {
     return repaired;
   }
 
-  /** One generateContent call returning the raw text candidate. */
+  /**
+   * One generateContent call returning the raw text candidate. Transient
+   * failures (503 overload, 429 rate limit, 5xx) are retried with exponential
+   * backoff before giving up — so a temporary Gemini spike self-heals instead
+   * of dropping the whole audit to the deterministic fallback.
+   */
   private async call(userPrompt: string): Promise<string> {
-    const res = await fetch(
-      `${ENDPOINT}/${this.model}:generateContent?key=${this.apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.3,
-            // Generous budget: Gemini 2.5's internal "thinking" also draws from
-            // this, so a tight cap can truncate the JSON.
-            maxOutputTokens: 16000,
-          },
-        }),
-      },
-    );
+    let res!: Response;
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      res = await fetch(
+        `${ENDPOINT}/${this.model}:generateContent?key=${this.apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.3,
+              // Generous budget: Gemini 2.5's internal "thinking" also draws
+              // from this, so a tight cap can truncate the JSON.
+              maxOutputTokens: 16000,
+            },
+          }),
+        },
+      );
+
+      if (res.ok) break;
+      // Retry transient errors with backoff; fail fast on everything else.
+      if (RETRYABLE.has(res.status) && attempt < MAX_RETRIES - 1) {
+        await sleep(600 * 2 ** attempt); // 600ms, 1.2s
+        continue;
+      }
+      break;
+    }
 
     if (!res.ok) {
       const body = await res.text().catch(() => "");
