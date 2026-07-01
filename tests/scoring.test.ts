@@ -203,4 +203,37 @@ describe("rankOpportunities", () => {
     const [ranked] = rankOpportunities([structuredOpp], evidence);
     expect(ranked.grounded).toBe(true);
   });
+
+  it("grounds reformatted citations (list joined differently) via word overlap", () => {
+    const evidence = makeEvidence(); // trustBadges: ["free shipping"]
+    const reformatted = makeOpp({
+      title: "Reinforce trust badges",
+      evidence: [
+        {
+          type: "text",
+          location: "Homepage trust badges",
+          selectorOrField: "homepage.trustBadges",
+          // Model joined the scraped list with a comma — real data, different formatting.
+          excerpt: "free shipping",
+          sourceUrl: "https://example.com",
+        },
+      ],
+    });
+    const hallucinated = makeOpp({
+      title: "Invented claim",
+      evidence: [
+        {
+          type: "text",
+          location: "Homepage",
+          selectorOrField: "homepage.badge",
+          excerpt: "voted number one by Forbes magazine 2024",
+          sourceUrl: "https://example.com",
+        },
+      ],
+    });
+
+    const ranked = rankOpportunities([reformatted, hallucinated], evidence);
+    expect(ranked.find((o) => o.title === "Reinforce trust badges")!.grounded).toBe(true);
+    expect(ranked.find((o) => o.title === "Invented claim")!.grounded).toBe(false);
+  });
 });

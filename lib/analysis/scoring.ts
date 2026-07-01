@@ -74,17 +74,40 @@ function normalize(s: string): string {
   return s.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+/** Common words ignored when comparing an excerpt against the scrape. */
+const STOPWORDS = new Set([
+  "the", "a", "an", "and", "or", "of", "to", "for", "in", "on", "is", "are",
+  "with", "this", "that", "by", "at", "from", "as", "it", "its", "was", "we",
+]);
+
+/** Meaningful lowercase word tokens (drops punctuation, stopwords, 1-2 char noise). */
+function tokenize(s: string): string[] {
+  return normalize(s)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 3 && !STOPWORDS.has(t));
+}
+
+/** Grounding threshold: share of an excerpt's words that must appear in the scrape. */
+const GROUNDING_THRESHOLD = 0.6;
+
 /**
- * An opportunity is grounded if every `element`/`text` evidence excerpt can be
- * found in the scrape corpus. `missing`-type evidence is exempt — the whole
- * point of "missing" is that the value is absent from the store.
+ * An opportunity is grounded if every `element`/`text` evidence excerpt is
+ * supported by the scrape. We compare on WORD OVERLAP, not exact substring:
+ * the model often reformats real data (joining a list as "free shipping, ssl",
+ * adding quotes, re-casing), and an exact match would wrongly flag those. A
+ * genuinely invented citation shares few words with the scrape and still fails.
+ * `missing`-type evidence is exempt — its whole point is that the value is
+ * absent from the store.
  */
 export function isGrounded(opp: LlmOpportunity, corpus: string): boolean {
+  const corpusTokens = new Set(tokenize(corpus));
   return opp.evidence.every((e) => {
     if (e.type === "missing") return true;
-    const needle = normalize(e.excerpt);
-    if (!needle) return true; // nothing to verify
-    return corpus.includes(needle);
+    const tokens = tokenize(e.excerpt);
+    if (tokens.length === 0) return true; // nothing meaningful to verify
+    const present = tokens.filter((t) => corpusTokens.has(t)).length;
+    return present / tokens.length >= GROUNDING_THRESHOLD;
   });
 }
 
