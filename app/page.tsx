@@ -47,6 +47,14 @@ export default function Home() {
         setLoading(false);
         return;
       }
+      // Stash the result so the audit page can render it without depending on
+      // the server-side cache, which isn't shared across serverless instances.
+      try {
+        sessionStorage.setItem(`audit:${data.id}`, JSON.stringify(data));
+      } catch {
+        // sessionStorage may be unavailable (private mode); the audit page
+        // falls back to fetching from the API.
+      }
       router.push(`/audit/${data.id}`);
     } catch {
       setError("Network error — is the server reachable?");
