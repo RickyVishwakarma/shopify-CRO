@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/RickyVishwakarma/shopify-CRO/actions/workflows/ci.yml/badge.svg)](https://github.com/RickyVishwakarma/shopify-CRO/actions/workflows/ci.yml)
 
+**Live demo: [shopify-cro-eight.vercel.app](https://shopify-cro-eight.vercel.app)** · try a server-rendered store like `allbirds.com` or `drsquatch.com`.
+
 Paste a Shopify store URL and get a prioritized, evidence-backed Conversion Rate Optimization audit. The recommendations come from an LLM working over the store's real catalog and page content, so they cite actual products and copy instead of handing back generic best-practice advice.
 
 Think of it as the pre-call research a CRO consultant would do before pitching a store: walk in already knowing where conversions are leaking.
