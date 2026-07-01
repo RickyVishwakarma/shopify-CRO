@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 /*
- * Calm, dark-first SaaS palette (Linear / Vercel register). Tokens are mapped
- * into Tailwind via @theme inline so utilities like `bg-card`,
- * `text-muted-foreground`, and `border-border` work throughout the app.
+ * Minimal, light palette. Tokens are mapped into Tailwind via @theme inline so
+ * utilities like `bg-card`, `text-muted-foreground`, and `border-border` work
+ * throughout the app. Quiet neutrals, a single blue accent, generous whitespace.
  */
 :root {
-  --background: #08090a;
-  --foreground: #ededee;
-  --card: #0d0e10;
-  --card-hover: #111316;
-  --muted: #16181c;
-  --muted-foreground: #8b9099;
-  --border: #1d2024;
-  --primary: #ededee;
-  --primary-foreground: #08090a;
-  --accent: #5b8cff;
-  --ring: #2a2e35;
+  --background: #ffffff;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-hover: #fafafa;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
+  --primary: #18181b;
+  --primary-foreground: #ffffff;
+  --accent: #2563eb;
+  --ring: #d4d4d8;
   --radius: 0.7rem;
 
-  --good: #3fb950;
-  --warn: #d29922;
-  --bad: #f05d5d;
+  --good: #16a34a;
+  --warn: #b45309;
+  --bad: #dc2626;
 }
 
 @theme inline {
@@ -53,15 +53,4 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Subtle radial backdrop so the page doesn't feel like a flat black sheet. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(60rem 40rem at 50% -10%, rgba(91, 140, 255, 0.06), transparent 70%);
-  pointer-events: none;
 }
