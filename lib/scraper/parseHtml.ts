@@ -157,22 +157,41 @@ export function parseProductPage(html: string): ProductPageParse {
   const hasReturnsInfo = /return|refund/.test(bodyText);
   const hasFaq = /faq|frequently asked/.test(bodyText);
 
-  // Add-to-cart CTA text.
-  const ctaText =
-    clean(
-      $(
-        'button[name="add"], [class*="add-to-cart"], button[class*="cart"], [class*="product-form"] button',
-      )
-        .first()
-        .text(),
-    ) || null;
-
   return {
     hasReviews,
     hasShippingInfo,
     hasReturnsInfo,
     hasFaq,
-    ctaText: ctaText || null,
+    ctaText: detectCtaText($),
     contentLength: bodyText.length,
   };
+}
+
+/**
+ * Best-effort add-to-cart CTA text. Themes vary a lot, so we try common
+ * structural selectors first, then fall back to scanning buttons/submits for
+ * add-to-cart-like label text. Returns null only when nothing plausible is
+ * found — which downstream is treated as "not detected", not "absent".
+ */
+function detectCtaText($: cheerio.CheerioAPI): string | null {
+  const structural = clean(
+    $(
+      'form[action*="/cart/add"] button, form[action*="/cart/add"] [type="submit"], ' +
+        'button[name="add"], [name="add"], [class*="add-to-cart"], [class*="AddToCart"], ' +
+        '[id*="AddToCart"], [data-add-to-cart], button[class*="cart"], ' +
+        '[class*="product-form"] button',
+    )
+      .first()
+      .text(),
+  );
+  if (structural) return structural;
+
+  // Text-based fallback: a button/submit whose label reads like a buy action.
+  let found: string | null = null;
+  $("button, [type='submit'], a[class*='button']").each((_, el) => {
+    if (found) return;
+    const label = clean($(el).text() || $(el).attr("value"));
+    if (/add to (cart|bag|basket)|buy now/i.test(label)) found = label;
+  });
+  return found;
 }

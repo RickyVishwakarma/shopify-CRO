@@ -11,8 +11,9 @@
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRIES = 2;
 const MAX_BYTES = 4_000_000; // ~4 MB; plenty for HTML/JSON, guards against abuse
-const USER_AGENT =
-  "CRO-Opportunity-Engine/1.0 (+audit bot; respects robots; contact via site owner)";
+// Honest, identifiable UA. We only read public endpoints (products.json,
+// collections.json) and the rendered homepage/PDP — no login-gated content.
+const USER_AGENT = "CRO-Opportunity-Engine/1.0 (+https://github.com/RickyVishwakarma/shopify-CRO)";
 
 export interface FetchResult {
   ok: boolean;
